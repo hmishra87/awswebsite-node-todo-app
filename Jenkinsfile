@@ -41,7 +41,7 @@ pipeline {
 
         stage('Run Container') {
             steps {
-                sh 'docker run -d -p 3001:3000 --name $CONTAINER_NAME $IMAGE_NAME:$TAG'
+                sh 'docker run -d -p 8000:8000 --name $CONTAINER_NAME $IMAGE_NAME:$TAG'
             }
         }
     }
