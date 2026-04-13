@@ -1,39 +1,47 @@
 pipeline {
-    agent { label "dev-server"}
-    
+    agent any
+
+    environment {
+        IMAGE_NAME = "node-todo-app"
+        CONTAINER_NAME = "node-todo-container"
+        TAG = "latest"
+    }
+
     stages {
-        
-        stage("code"){
-            steps{
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
-                echo 'bhaiyya code clone ho gaya'
+
+        stage('Clone Code') {
+            steps {
+                git 'https://github.com/hmishra87/awswebsite-node-todo-app.git'
             }
         }
-        stage("build and test"){
-            steps{
-                sh "docker build -t node-app-test-new ."
-                echo 'code build bhi ho gaya'
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
             }
         }
-        stage("scan image"){
-            steps{
-                echo 'image scanning ho gayi'
+
+        stage('Stop Old Container') {
+            steps {
+                sh 'docker rm -f $CONTAINER_NAME || true'
             }
         }
-        stage("push"){
-            steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker tag node-app-test-new:latest ${env.dockerHubUser}/node-app-test-new:latest"
-                sh "docker push ${env.dockerHubUser}/node-app-test-new:latest"
-                echo 'image push ho gaya'
-                }
+
+        stage('Remove Old Image') {
+            steps {
+                sh 'docker rmi $IMAGE_NAME:$TAG || true'
             }
         }
-        stage("deploy"){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
-                echo 'deployment ho gayi'
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$TAG .'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d -p 3001:3000 --name $CONTAINER_NAME $IMAGE_NAME:$TAG'
             }
         }
     }
