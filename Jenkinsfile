@@ -12,6 +12,7 @@ pipeline {
         stage('Clone Code') {
             steps {
                 git 'https://github.com/hmishra87/awswebsite-node-todo-app.git'
+                
             }
         }
 
