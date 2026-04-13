@@ -9,10 +9,9 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
+        stage('Checkout Code') {
             steps {
-                git 'https://github.com/hmishra87/awswebsite-node-todo-app.git'
-                
+                git branch: 'main', url: 'https://github.com/hmishra87/awswebsite-node-todo-app.git'
             }
         }
 
@@ -24,7 +23,8 @@ pipeline {
 
         stage('Stop Old Container') {
             steps {
-                sh 'docker rm -f $CONTAINER_NAME || true'
+                sh 'docker stop $CONTAINER_NAME || true'
+                sh 'docker rm $CONTAINER_NAME || true'
             }
         }
 
@@ -43,6 +43,12 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh 'docker run -d -p 8000:8000 --name $CONTAINER_NAME $IMAGE_NAME:$TAG'
+            }
+        }
+
+        stage('Verify Container') {
+            steps {
+                sh 'docker ps | grep $CONTAINER_NAME'
             }
         }
     }
